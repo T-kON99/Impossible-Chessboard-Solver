@@ -19,11 +19,11 @@ class Board(object):
             self.__data = data
         self.always_winnnable = self.__size & (self.__size - 1) == 0
 
-    def get_pos(self, coin: int):
+    def get_loc(self, coin: int):
         assert isinstance(coin, int) and coin < self.__size ** 2, f'Coin {coin} is out of bound of {self.__size} x {self.__size}: has to be less than {self.__size ** 2}'
         return (coin // self.__size, coin % self.__size)
 
-    def to_pos(self, x: int, y: int):
+    def to_val(self, x: int, y: int):
         assert isinstance(x, int) and isinstance(y, int) and 0 <= x < self.__size and 0 <= y < self.__size, f'Location ({x}, {y}) is not in range of ({self.__size}, {self.__size})'
         return x*self.__size + y
 
@@ -32,14 +32,14 @@ class Board(object):
         if key is None:
             key = random.randint(0, self.__size ** 2 - 1)
         res = key
-        print(f'Key location at {key}, location {self.get_pos(key)}')
+        print(f'Key value at {key}, location {self.get_loc(key)}')
         self.__encoding_steps.append(f'Take given key as a result with value {key}')
         for x, row in enumerate(self.__data):
             for y, value in enumerate(row):
                 if value == 1:
-                    self.__encoding_steps.append(f'XOR result with coin at location ({x}, {y}) -> {res} ^ {self.to_pos(x, y)} = {res ^ self.to_pos(x, y)}')
-                    res ^= self.to_pos(x, y)
-        flip_x, flip_y = self.get_pos(res)
+                    self.__encoding_steps.append(f'XOR result with coin at location ({x}, {y}) -> {res} ^ {self.to_val(x, y)} = {res ^ self.to_val(x, y)}')
+                    res ^= self.to_val(x, y)
+        flip_x, flip_y = self.get_loc(res)
         self.__encoding_steps.append(f'Flip coin-th {res} at location ({flip_x}, {flip_y})')
         self.__data[flip_x][flip_y] = (self.__data[flip_x][flip_y] + 1) % 2
         return key, res
@@ -50,7 +50,7 @@ class Board(object):
         for x, row, in enumerate(self.__data):
             for y, value in enumerate(row):
                 if value == 1:
-                    coin_value = self.to_pos(x, y)
+                    coin_value = self.to_val(x, y)
                     if res is None:
                         self.__decoding_steps.append(f'First coin that has value 1 is at coin-th {coin_value} location ({x}, {y})')
                         res = coin_value
@@ -73,20 +73,20 @@ class Board(object):
         return '\n'.join(str(row) for row in self.__data)
 
 if __name__ == "__main__":
-    game = Board(size=5)
+    game = Board(size=8)
     print('Before encoding')
     print(game, end='\n\n')
     print('Guard will randomly place one key on one of the board field')
     print('Prisoner 1 attempts to encode')
-    key_loc, flip_loc = game.encode()
+    key_val, flip_val = game.encode()
     print(game.get_encoding_steps())
-    print(f'Prisoner 1 flips coin {flip_loc} at location {game.get_pos(flip_loc)}')
+    print(f'Prisoner 1 flips coin {flip_val} at location {game.get_loc(flip_val)}')
     print('Prisoner 2 comes in and see the new board')
     print(game, end='\n\n')
-    decoded_loc = game.decode()
+    decoded_val = game.decode()
     print('Prisoner 2 attempts to decode')
     print(game.get_decoding_steps())
-    print(f'Prisoner 2 guessed the original key location at coin-th: {decoded_loc}, at location {game.get_pos(decoded_loc)}')
+    print(f'Prisoner 2 guessed the original key location at coin-th: {decoded_val}, at location {game.get_loc(decoded_val)}')
     print(f'Game is always winnnable: {game.always_winnnable}')
-    print(f'Key location {key_loc}, Decoded location {decoded_loc}')
+    print(f'Key value {key_val}, Decoded value {decoded_val}')
     
