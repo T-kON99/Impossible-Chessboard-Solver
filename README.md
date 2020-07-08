@@ -19,5 +19,7 @@ For more details refer to 3Blue1Brown's video [here](https://www.youtube.com/wat
 To just start an easy simulation, do the below. You can change the settings if needed.
 
 ```bash
+git clone https://github.com/T-kON99/Impossible-Chessboard-Solver.git Solver
+cd Solver
 python Game.py
 ```
