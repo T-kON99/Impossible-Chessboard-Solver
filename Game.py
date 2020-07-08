@@ -17,22 +17,23 @@ class Board(object):
                     assert val in [0, 1], f'Value {val} does not match either 0 or 1'
             self.__size = len(data)
             self.__data = data
+        self.always_winnnable = self.__size & (self.__size - 1) == 0
 
     def get_pos(self, coin: int):
-        assert coin < self.__size ** 2 and isinstance(coin, int), f'Coin {coin} is not less than {self.__size ** 2}'
+        assert isinstance(coin, int) and coin < self.__size ** 2, f'Coin {coin} is out of bound of {self.__size} x {self.__size}: has to be less than {self.__size ** 2}'
         return (coin // self.__size, coin % self.__size)
 
     def to_pos(self, x: int, y: int):
         assert isinstance(x, int) and isinstance(y, int) and 0 <= x < self.__size and 0 <= y < self.__size, f'Location ({x}, {y}) is not in range of ({self.__size}, {self.__size})'
         return x*self.__size + y
 
-    def encode(self, coin: int = None):
+    def encode(self, key: int = None):
         self.__encoding_steps = []
-        if coin is None:
-            coin = random.randint(0, self.__size ** 2 - 1)
-        res = coin
-        print(f'Key location at {coin}, location {self.get_pos(coin)}')
-        self.__encoding_steps.append(f'Take given coin as a result with value {coin}')
+        if key is None:
+            key = random.randint(0, self.__size ** 2 - 1)
+        res = key
+        print(f'Key location at {key}, location {self.get_pos(key)}')
+        self.__encoding_steps.append(f'Take given key as a result with value {key}')
         for x, row in enumerate(self.__data):
             for y, value in enumerate(row):
                 if value == 1:
@@ -41,7 +42,7 @@ class Board(object):
         flip_x, flip_y = self.get_pos(res)
         self.__encoding_steps.append(f'Flip coin-th {res} at location ({flip_x}, {flip_y})')
         self.__data[flip_x][flip_y] = (self.__data[flip_x][flip_y] + 1) % 2
-        return res
+        return key, res
 
     def decode(self):
         self.__decoding_steps = []
@@ -72,18 +73,20 @@ class Board(object):
         return '\n'.join(str(row) for row in self.__data)
 
 if __name__ == "__main__":
-    game = Board(size=8)
+    game = Board(size=5)
     print('Before encoding')
     print(game, end='\n\n')
     print('Guard will randomly place one key on one of the board field')
-    key = game.encode()
     print('Prisoner 1 attempts to encode')
+    key_loc, flip_loc = game.encode()
     print(game.get_encoding_steps())
-    print(f'Prisoner 1 flips coin {key} at location {game.get_pos(key)}')
+    print(f'Prisoner 1 flips coin {flip_loc} at location {game.get_pos(flip_loc)}')
     print('Prisoner 2 comes in and see the new board')
     print(game, end='\n\n')
     decoded_loc = game.decode()
     print('Prisoner 2 attempts to decode')
     print(game.get_decoding_steps())
     print(f'Prisoner 2 guessed the original key location at coin-th: {decoded_loc}, at location {game.get_pos(decoded_loc)}')
+    print(f'Game is always winnnable: {game.always_winnnable}')
+    print(f'Key location {key_loc}, Decoded location {decoded_loc}')
     
